@@ -39,6 +39,13 @@ class Client():
         except FileNotFoundError:
             sleep(5)
             return self.setup()
+    def get_history(self):
+            response = get(f"https://pd.{self.region}.a.pvp.net/match-history/v1/history/{self.puuid}", headers=self.headers)
+            if response.ok:
+                return response.json()["History"]
+            else:
+                self.headers, self.puuid = self.setup()
+                return self.get_history()
     def get_latest(self):
         match_id=get(f"https://pd.{self.region}.a.pvp.net/match-history/v1/history/{self.puuid}", headers=self.headers).json()
         try:
