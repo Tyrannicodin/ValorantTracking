@@ -31,8 +31,16 @@ def add_match(dat):
     file["matches"].append(dat)
     with open("data.json", "w") as f:
         dump(file, f)
+        tracked.append(file["ID"])
+
+with open("data.json", "r") as f:
+    tracked = load(f)["matches"]
 
 #History
+def remove_button_add_match(button, match):
+    button.grid_forget()
+    add_match(match)
+
 def openHistory():
     historyWindow = Toplevel(root)
     for game in cli.get_history(MAX_MATCHES):
@@ -43,8 +51,10 @@ def openHistory():
         text += str([p["stats"]["kills"] for p in game["players"] if p["ID"] == cli.puuid][0])
         l = Label(f, text=text)
         l.grid(column=0, row=0)
-        add = Button(f, text="Add match", command=partial(add_match, game))
-        add.grid(column=1, row=0)
+        if not game["ID"] in tracked:
+            add = Button(f, text="Add match")
+            add.configure(command=partial(remove_button_add_match, add, game))
+            add.grid(column=1, row=0)
         f.pack(anchor="n")
 
 #Add buttons, labels, etc.
