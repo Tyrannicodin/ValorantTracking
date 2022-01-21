@@ -31,10 +31,10 @@ def add_match(dat):
     file["matches"].append(dat)
     with open("data.json", "w") as f:
         dump(file, f)
-        tracked.append(file["ID"])
+        tracked.append(dat["ID"])
 
 with open("data.json", "r") as f:
-    tracked = load(f)["matches"]
+    tracked = [m["ID"] for m in load(f)["matches"]]
 
 #History
 def remove_button_add_match(button, match):
