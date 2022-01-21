@@ -80,18 +80,21 @@ class Client():
                 "card":player["playerCard"],
                 "title":player["playerTitle"],
                 "level":player["accountLevel"],
-                "behaviour":{
-                    "afkRounds":player["behaviorFactors"]["afkRounds"],
-                    "inFriendlyDamage":player["behaviorFactors"]["friendlyFireIncoming"],
-                    "outFriendlyDamage":player["behaviorFactors"]["friendlyFireOutgoing"],
-                    "spawnRounds":player["behaviorFactors"]["stayedInSpawnRounds"]
-                    },
                 "stats":{
                     "score":player["stats"]["score"],
                     "rounds":player["stats"]["roundsPlayed"],
                     "kills":player["stats"]["kills"],
                     "deaths":player["stats"]["deaths"],
                     "assists":player["stats"]["assists"],}}
+            if "friendlyFireIncoming" in player["behaviorFactors"]:
+                player["behaviour"] = {
+                    "afkRounds":player["behaviorFactors"]["afkRounds"],
+                    "inFriendlyDamage":player["behaviorFactors"]["friendlyFireIncoming"],
+                    "outFriendlyDamage":player["behaviorFactors"]["friendlyFireOutgoing"],
+                    "spawnRounds":player["behaviorFactors"]["stayedInSpawnRounds"]
+                    }
+            else:
+                player["behaviour"] = {"afkRounds":player["behaviorFactors"]["afkRounds"]}
             if "xpModifications" in player.keys():
                 parsed_player["xpModifiers"]=player["xpModifications"]
             else:
