@@ -1,6 +1,7 @@
 #Import requirements
 from json import dump, load
 from tkinter import BooleanVar, Button, Label, TclError, Tk, Checkbutton, Toplevel, Frame
+from requests import get
 from functools import partial
 from client import Client
 from time import time as timestamp
@@ -36,8 +37,9 @@ def openHistory():
     historyWindow = Toplevel(root)
     for game in cli.get_history(MAX_MATCHES):
         f = Frame(historyWindow)
+        game = get(f"https://pd.{cli.region}.a.pvp.net/match-details/v1/matches/{game['MatchID']}", headers=cli.headers).json()
         game = cli.parse_match(game)
-        text=f"Map: {game['map']}      Queue: {game['typle']}\n"
+        text=f"Map: {game['map']}      Queue: {game['type']}\nKills: "
         text += str([p["stats"]["kills"] for p in game["players"] if p["ID"] == cli.puuid][0])
         l = Label(f, text=text)
         l.grid(column=0, row=0)
@@ -60,13 +62,13 @@ view.grid(row=2, column=0)
 
 #Init values used in mainloop
 next_check = timestamp() + CHECK_INTERVAL
-lastID = cli.parsed_latest()["ID"]
+lastID = cli.parse_match()["ID"]
 
 #mainloop
 while True:
     if timestamp() >= next_check and trackOn:
         next_check = timestamp() + CHECK_INTERVAL
-        dat = cli.parsed_latest()
+        dat = cli.parse_match()
         if dat["ID"] != lastID:
             add_match(dat)
     elif not trackOn:
