@@ -16,7 +16,7 @@ from requests import post, get
 #Set constants
 MAX_MATCHES = 10
 CHECK_INTERVAL = 10
-URL = "http://127.0.0.1:5000"
+URL = "http://129.151.88.198:5000"
 
 #Init data.json and other files
 try:
@@ -156,7 +156,6 @@ def openView():
     gen.grid(column=1, row=1)
 
 #Transfer protocol
-## Need to run server and then fill in url
 class fakeResp:
     def __init__(self):
         self.status_code = 0
