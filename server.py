@@ -1,9 +1,6 @@
 from flask import Flask, request
 from json import load, dump, loads
 
-from itsdangerous import exc
-from numpy import where
-
 app = Flask(__name__)
 
 @app.post("/upload")
