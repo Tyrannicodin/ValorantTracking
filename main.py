@@ -1,6 +1,7 @@
 #Import requirements
 from json import dump, load
 from tkinter import BooleanVar, Button, Label, OptionMenu, StringVar, TclError, Tk, Checkbutton, Toplevel, Frame
+from tkinter.messagebox import askyesno
 from requests import get
 from functools import partial
 from client import Client
@@ -11,17 +12,19 @@ from PIL.ImageFont import truetype
 from random import randint
 from collections import Counter
 from PIL.ImageTk import PhotoImage
+from requests import post
 
-#Set constans
+#Set constants
 MAX_MATCHES = 10
 CHECK_INTERVAL = 10
+URL = "http://127.0.0.1:5000"
 
 #Init data.json
 try:
     open("data.json", "r").close()
 except FileNotFoundError:
     with open("data.json", "w") as f:
-        dump({"matches":[]}, f)
+        dump({"matches":[], "tracked":[]}, f)
 
 #See client.py
 cli = Client()
@@ -40,7 +43,9 @@ def add_match(dat):
         tracked.append(dat["ID"])
 
 with open("data.json", "r") as f:
-    tracked = [m["ID"] for m in load(f)["matches"]]
+    info = load(f)
+    tracked = [m["ID"] for m in info["matches"]]
+    [tracked.append(m["ID"]) for m in info["tracked"]]
 
 #History
 def remove_button_add_match(button, match):
@@ -146,6 +151,35 @@ def openView():
     graphSelector.grid(column=1, row=0)
     gen.grid(column=1, row=1)
 
+#Transfer protocol
+## Need to run server and then fill in url
+class fakeResp:
+    def __init__(self):
+        self.status_code = 0
+def upload_data(uploadButton:Button):
+    with open("data.json", "r") as f:
+        data = load(f)
+    upload = []
+    for match in data["matches"]:
+        if not match["ID"] in data["tracked"]:
+            upload.append(match)
+            data["tracked"].append(match["ID"])
+    data["matches"] = []
+    try:
+        response = post(f"{URL}/upload", json=upload, headers={"region":cli.region, "puuid":cli.puuid})
+    except ConnectionError:
+        response = fakeResp()
+    if response.status_code == 200:
+        with open("dataDone.json", "w") as f:
+            dump(data, f)
+        uploadButton.configure(background="green")
+    else:
+        uploadButton.configure(background="red")
+
+def confirm_upload(uploadButton):
+    if askyesno("Uploading data", "This will upload all data from your recorded matches, your player id and region.\nAre you sure you want to do this?"):
+        upload_data(uploadButton)
+
 #Add buttons, labels, etc.
 trackLabel = Label(root, text="Tracking enabled: ")
 trackOn = BooleanVar()
@@ -153,11 +187,14 @@ trackOnCheck = Checkbutton(root, variable=trackOn)
 trackOnCheck.select()
 history = Button(root, text=f"View history ({MAX_MATCHES} matches)", command=openHistory)
 view = Button(root, text="View data", command=openView)
+upload = Button(root, text="Upload data")
+upload.configure(command=partial(confirm_upload, upload))
 
 trackLabel.grid(row=0, column=0)
 trackOnCheck.grid(row=0, column=1)
 history.grid(row=1, column=0)
 view.grid(row=2, column=0)
+upload.grid(row=3, column=0)
 
 #Init values used in mainloop
 next_check = timestamp() + CHECK_INTERVAL
