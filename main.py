@@ -2,7 +2,6 @@
 from json import dump, load
 from tkinter import BooleanVar, Button, Label, OptionMenu, StringVar, TclError, Tk, Checkbutton, Toplevel, Frame
 from tkinter.messagebox import askyesno
-from requests import get
 from functools import partial
 from client import Client
 from time import time as timestamp
@@ -12,19 +11,24 @@ from PIL.ImageFont import truetype
 from random import randint
 from collections import Counter
 from PIL.ImageTk import PhotoImage
-from requests import post
+from requests import post, get
 
 #Set constants
 MAX_MATCHES = 10
 CHECK_INTERVAL = 10
 URL = "http://127.0.0.1:5000"
 
-#Init data.json
+#Init data.json and other files
 try:
     open("data.json", "r").close()
 except FileNotFoundError:
     with open("data.json", "w") as f:
         dump({"matches":[], "tracked":[]}, f)
+try:
+    open("arial.ttf").close()
+except FileNotFoundError:
+    with open("arial.ttf", "wb") as f:
+        f.write(get("https://github.com/Tyrannicodin/ValorantTracking/blob/main/arial.ttf?raw=true").content)
 
 #See client.py
 cli = Client()
